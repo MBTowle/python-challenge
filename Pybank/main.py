@@ -1,50 +1,80 @@
 #%%
-
 import os
 import csv
+import sys
 
 # Path to collect data from the Resources folder
 csv_path = os.path.join('Resources','budget_data.csv')
 
-# Create initial variables
-total_number_months = 0
-net_total_profit_loss = 0
-#budget_profit_loss = 0
-#previous_budget_profit_loss = 0
-#greatest_profit_increase = 0
-#greatest_profit_decrease = 0
-#total_change_profit_loss = 0
-#change_profit_loss = 0
-
-
 #Read in the csv file
 with open(csv_path,'r') as csvfile:
-        #split the data on commas
-        csvreader = csv.reader(csvfile,delimiter=',')
-        header = next(csvreader)
+    #split the data on commas
+    csvreader = csv.reader(csvfile,delimiter=',')
+    header = next(csvreader)
+    total_months = []
+    total_profit = []
+    month_start = 0
+    total_change = 0
+    row_count = 0
+    monthly_profit_change = 0
+    greatest_profit_increase = 0
+    greatest_profit_decrease = 0
 
-        for row in csvreader:
-                #add to the number of months as 1 for each month
-                total_number_months = total_number_months + 1
-                #print(total_number_months)
-                #read the profit or loss from this month and add to the total of profit or loss
-                net_total_profit_loss += row[1]
-                print(net_total_profit_loss)
-                #read in the change in profit loss from previous month to this month
-                #change_profit_loss = row[1] - row-1[1]
-                #add this change to the total change
-                #total_change_profit_loss = total_change_profit_loss + change_profit_loss
-                #Greatest increase in profits (date and amount) over entire period
-                #if change_profit_loss > greatest_profit_increase:
-                #        greatest_profict_increase = change_profit_loss
-                #Greatest decrease in losses (date and amount) over entire period
-                #if change_profit_loss < greatest_profit_decrease:
-                #        greatest_profit_decrease = change_profit_loss
-                
+     #-------------- Loop to Read Data ------------------------
+    for row in csvreader:
+        #read total months       
+        total_months.append(str(row[0]))
+        #read total profit
+        total_profit.append(int(row[1]))
+        #read date
+        record_date = (row[0])
+        #read month end for change
+        month_end = int(row[1])
+        #testing
+        row_count = row_count + 1
 
-#Define function and have it accept the 'profit_loss_data' as its sole parameter
-#def print_profit_loss_totals(profit_loss_data):
-#average_change_profit_loss = total_change_profit_loss / total_number_months
-#print(average_change_profit_loss)
+        if row_count > 1:
+            #determine the profit change for the month over month
+            monthly_profit_change = month_end - month_start
+        #determine greatest profit increase    
+        if monthly_profit_change > greatest_profit_increase:
+            greatest_profit_increase = monthly_profit_change
+            greatest_profit_increase_date = record_date
+        #determine greatest profit decrease 
+        if monthly_profit_change < greatest_profit_decrease:
+            greatest_profit_decrease = monthly_profit_change
+            greatest_profit_decrease_date = record_date    
+        #add the profit change to the total profit change
+        total_change = total_change + monthly_profit_change
+        #set the start month back to ending profit
+        month_start = month_end
+    total_number_months = len(total_months)
+    #-------------- Print to Screen ------------------------
+    print(f"Financial Analysis")
+    print(f"-----------------------------")
+    print(f"Total Months: {(total_number_months)}")
+    print(f"Total: ${sum(total_profit)}")
+    average_change = total_change /(len(total_months)-1)
+    print(f"Average Change: ${(average_change):.2f}")
+    print(f"Greatest Increase in Profits: {(greatest_profit_increase_date)} (${(greatest_profit_increase)})")
+    print(f"Greatest Decrease in Profits: {(greatest_profit_decrease_date)} (${(greatest_profit_decrease)})")
+    #-------------- Print to Text File ------------------------
+    original_stdout = sys.stdout
+    with open('FinancialAnalysis.txt', 'w') as f:
+        sys.stdout = f
+        print(f"Financial Analysis")
+        print(f"-----------------------------")
+        print(f"Total Months: {(total_number_months)}")
+        print(f"Total: ${sum(total_profit)}")
+        average_change = total_change /(len(total_months)-1)
+        print(f"Average Change: ${(average_change):.2f}")
+        print(f"Greatest Increase in Profits: {(greatest_profit_increase_date)} (${(greatest_profit_increase)})")
+        print(f"Greatest Decrease in Profits: {(greatest_profit_decrease_date)} (${(greatest_profit_decrease)})")
+        sys.stdout = original_stdout
+    
+
+
+
+
 
 #%%
